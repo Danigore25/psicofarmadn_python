@@ -123,6 +123,7 @@ def pharm_geno(genotype, gen_name):
     response5 = requests.get(var_url5, [("name", genotype), ("gene.symbol", gen_name)])
     decoded = response5.json()
     print("Simbolo de haplotipo: ", decoded['data'][0]['symbol'])
+    genotype_full = decoded['data'][0]['symbol']
     print("Actividad: ", decoded['data'][0]['activityValue'])
     haplo_id = decoded['data'][0]['id']
     print("Id de haplotipo en pharmgkb: ", haplo_id)
@@ -136,12 +137,32 @@ def pharm_geno(genotype, gen_name):
     decoded3 = response7.json()
     print("Anotacion clinica: ", decoded3)
 
-    # Population - variant freq
-    haplo_full = gen_name + " " + genotype
-    var_url9 = "https://api.pharmgkb.org/v1/report/variantFrequency/"
-    response9 = requests.get(var_url9, [("fp", haplo_full)])
-    decoded5 = response9.json()
-    print("Frecuencia: ", decoded5)
+    # Population - esearch and elink clinvar-snp
+    handle3 = Entrez.esearch(db="clinvar", term=genotype_full)
+    record8 = Entrez.read(handle3)
+    clinvar_id = record8['IdList'][0]
+
+    handle3 = Entrez.elink(dbfrom="clinvar", db="snp", id=clinvar_id)
+    record9 = Entrez.read(handle3)
+    print("Busqueda de variante clinvar-snp: ", record9[0]['LinkSetDb'][0]['Link'][0]['Id'])
+    snp_id = record9[0]['LinkSetDb'][0]['Link'][0]['Id']
+
+    handle3 = Entrez.esummary(db="snp", id=snp_id)
+    record10 = Entrez.read(handle3)
+    print("Summary de snp de haplotipo: ", record10)
+    rs_snp = "rs" + snp_id
+    print(rs_snp)
+
+    var_url_ensembl2 = "https://rest.ensembl.org"
+    extens = "/variation/human/"
+    responsen = requests.get(var_url_ensembl2 + extens + rs_snp + "?pops=1",
+                             headers={"Content-Type": "application/json"})
+    decoded11 = responsen.json()
+
+    print("Incidencia en poblacion latina: ", decoded11['populations'][80])
+    print(decoded11['populations'][81])
+
+    handle3.close()
 
 
 def pubmed(genotype):
