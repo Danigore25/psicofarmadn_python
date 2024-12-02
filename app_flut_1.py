@@ -48,9 +48,11 @@ try:
     exten = "/variation/human/"
     response_ens = requests.get(var_url_ensembl1 + exten + rs + "?pops=1", headers={"Content-Type": "application/json"})
     decoded0 = response_ens.json()
-    # print("Incidencia poblacional de rs en ensembl: ", repr(decoded0))
-    print("Incidencia en poblacion latina: ", decoded0['populations'][80])
-    print(decoded0['populations'][81])
+    # print("Frecuencia general: ", decoded0['populations'])
+    list1 = decoded0['populations']
+    for population in list1:
+        if population['population'] == '1000GENOMES:phase_3:AMR':
+            print("Incidencia latina: ", population)
 
     handle = Entrez.esearch(db="pubmed", term=rs)
     record4 = Entrez.read(handle)
@@ -151,7 +153,7 @@ def pharm_geno(genotype, gen_name):
     record10 = Entrez.read(handle3)
     print("Summary de snp de haplotipo: ", record10)
     rs_snp = "rs" + snp_id
-    print(rs_snp)
+    print("rs asociado al haplotipo: ", rs_snp)
 
     var_url_ensembl2 = "https://rest.ensembl.org"
     extens = "/variation/human/"
@@ -159,9 +161,11 @@ def pharm_geno(genotype, gen_name):
                              headers={"Content-Type": "application/json"})
     decoded11 = responsen.json()
 
-    print("Incidencia en poblacion latina: ", decoded11['populations'][80])
-    print(decoded11['populations'][81])
-
+    print("Incidencia mundial: ", decoded11['populations'])
+    lista = decoded11['populations']
+    for popul in lista:
+        if popul['population'] == '1000GENOMES:phase_3:AMR':
+            print("Incidencia latina: ", popul)
     handle3.close()
 
 
@@ -235,7 +239,7 @@ elif geno2_search:
     res1 = r'^\w+'
     alelo1 = re.sub(res1, "", var)
     pharm_geno(alelo1, gen)
-    pubmed(alelo1)
+    pubmed(var)
 
 elif geno3_search:
     antes = r'\/\*\w+'
